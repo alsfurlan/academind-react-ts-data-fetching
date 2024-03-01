@@ -2,21 +2,23 @@ import { ReactNode, useEffect, useState } from 'react';
 import { get } from './util/http';
 import BlogPosts, { BlogPost } from './components/BlogPosts';
 import fetchImage from './assets/data-fetching.png';
+import { z } from 'zod';
 
-type BlogPostDto = {
-  id: number;
-  userId: number;
-  title: string;
-  body: string;
-};
+const rawDataBlogPostSchema = z.object({
+  id: z.number(),
+  userId: z.number(),
+  title: z.string(),
+  body: z.string(),
+})
 
 function App() {
   const [fetchedPosts, setFetchedPosts] = useState<BlogPost[]>();
 
   useEffect(() => {
     async function fecthPosts() {
-      const data = await get<BlogPostDto[]>(
-        'https://jsonplaceholder.typicode.com/posts/'
+      const data = await get(
+        'https://jsonplaceholder.typicode.com/posts/',
+        z.array(rawDataBlogPostSchema)
       );
 
       const blogPosts: BlogPost[] = data.map(({ id, title, body }) => ({

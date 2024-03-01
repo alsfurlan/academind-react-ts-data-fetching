@@ -13,9 +13,11 @@ const rawDataBlogPostSchema = z.object({
 
 function App() {
   const [fetchedPosts, setFetchedPosts] = useState<BlogPost[]>();
+  const [isFetching, setIsFetching] = useState<boolean>();
 
   useEffect(() => {
-    async function fecthPosts() {
+    async function getPosts() {
+      setIsFetching(true);
       const data = await get(
         'https://jsonplaceholder.typicode.com/posts/',
         z.array(rawDataBlogPostSchema)
@@ -26,16 +28,22 @@ function App() {
         title,
         text: body,
       }));
-
+      setIsFetching(false);
       setFetchedPosts(blogPosts);
     }
 
-    fecthPosts();
+    getPosts();
   }, []);
 
-  let content: ReactNode = fetchedPosts ? (
-    <BlogPosts posts={fetchedPosts} />
-  ) : null;
+  let content: ReactNode;
+  
+  if(fetchedPosts){
+    content = <BlogPosts posts={fetchedPosts} />
+  }
+
+  if(isFetching) {
+    content = <p id="loading-fallback">Fetching posts...</p>
+  }
 
   return (
     <main>
